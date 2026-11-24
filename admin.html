@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Standard Fruit Products</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-login">
+    <h1>Admin Panel</h1>
+    <h3>Standard Fruit Products</h3>
+
+    <input type="email" id="admin-email" placeholder="Admin Email">
+
+    <input type="password" id="admin-password" placeholder="Admin Password">
+
+    <button id="admin-login-btn" type="button">
+        Login
+    </button>
+
+    <p id="login-message"></p>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyB-3BwzXO928M92ptKwfdzpfMY5T3wqXUI",
+    authDomain: "standard-fruits-products.firebaseapp.com",
+    projectId: "standard-fruits-products",
+    storageBucket: "standard-fruits-products.firebasestorage.app",
+    messagingSenderId: "141486500587",
+    appId: "1:141486500587:web:a9e501c3d9ae147d68acae"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const OWNER_UID = "j9TyGGrQjxZT6ZnwMmOQnb7ztJi2";
+
+// ADMIN LOGIN
+document.getElementById("admin-login-btn")
+.addEventListener("click", async function() {
+
+    const email = document.getElementById("admin-email").value.trim();
+    const password = document.getElementById("admin-password").value;
+    const message = document.getElementById("login-message");
+
+    if (!email || !password) {
+        message.textContent = "Please enter email and password.";
+        return;
+    }
+
+    try {
+        const userCredential =
+    await auth.signInWithEmailAndPassword(email, password);
+
+if (userCredential.user.uid !== OWNER_UID) {
+    await auth.signOut();
+    message.textContent = "Access Denied! You are not the Admin.";
+    return;
+}
+
+message.textContent = "Admin Login Successful!";
+window.location.href ="dashboard.html";
+
+    } catch (error) {
+        console.error(error);
+        message.textContent = "Login failed. Please check your details.";
+    }
+});
+</script>
+
+</body>
+</html>

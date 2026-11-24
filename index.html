@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+    <title>Standard Fruit Products</title>
+    <link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyB-3BwzXO928M92ptKwfdzpfMY5T3wqXUI",
+    authDomain: "standard-fruits-products.firebaseapp.com",
+    projectId: "standard-fruits-products",
+    storageBucket: "standard-fruits-products.firebasestorage.app",
+    messagingSenderId: "141486500587",
+    appId: "1:141486500587:web:a9e501c3d9ae147d68acae"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
+<script src="script.js" defer></script>
+</head>
+    <body>
+        <div id="top-area">
+        <nav>
+            <h2>Standard Fruit Product</h2>
+
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="delivery-bar">
+    <p>🚚 Delivery Available All Over Pakistan</p>
+</div>
+        </div>
+        <div id="top-info">
+
+    <div id="logo-area">
+        <img src="images/logo.jpg"
+             alt="Standard Fruit Products Logo">
+    </div>
+
+    <section id="shopping-cart">
+        <h2>My Shopping Cart</h2>
+
+        <p>Total items: <span id="cart-count">0</span></p>
+
+        <div id="cart-items"></div>
+
+        <button id="checkout-btn">
+            Checkout
+        </button>
+
+        <div id="checkout-area"></div>
+    </section>
+
+</div>
+        <section id="home">
+            <h1>Welcome To Standard Fruit Products Official Website</h1>
+        </section>
+        <section id="products">
+            <h2>Our  Products</h2>
+            </section>
+            </div>
+            <div id="product-list"></div>
+            <!-- PRODUCT DETAILS POPUP -->
+<div id="product-details" class="product-details" hidden>
+    <div class="details-content">
+        <button id="close-details" type="button">×</button>
+
+        <img id="details-image" src="" alt="Product">
+
+        <h2 id="details-name"></h2>
+        <p id="details-price"></p>
+
+        <h3>Product Description</h3>
+        <p id="details-english"></p>
+
+        <h3>مصنوعات کی تفصیل</h3>
+        <p id="details-urdu" dir="rtl"></p>
+
+        <h3>Customer Reviews</h3>
+        <div id="customer-reviews"></div>
+
+        <h3>Write a Review</h3>
+        <input id="review-name" type="text"
+            placeholder="Your Name">
+
+        <textarea id="review-text"
+            placeholder="Write your review"></textarea>
+
+        <button id="submit-review" type="button">
+            Submit Review
+        </button>
+    </div>
+</div>
+        <div id="jaman-area">
+            <section id="about">
+    <h2>About Us</h2>
+
+    <h3>Our Story</h3>
+    <p>
+        Standard Fruit Products is a Peshawar-based company
+        established in 1967. We specialize in producing
+        quality traditional and natural products.
+    </p>
+
+    <h3>Our Products</h3>
+    <p>
+        We offer Arqiat (Herbal Distillates), Vinegars,
+        Sharbats.
+    </p>
+
+    <h3>Our Quality</h3>
+    <p>
+        We are committed to providing quality products
+        while maintaining food safety standards.
+    </p>
+
+    <h3>Our Location</h3>
+    <p>
+        Raheel Chamber, Clock Tower, Peshawar, Pakistan.
+    </p>
+
+    <h3>Contact Information</h3>
+    <p>Phone: 03005980901</p>
+    <p>Email: info@standardfruitproducts.com</p>
+
+    <h3>Quality and Tradition Since 1967</h3>
+</section>
+            <section id="contact">
+                <h2>Contact Us</h2>
+                <form id="contact-form">
+                    <input type="text" placeholder="Your Name">
+                    <textarea placeholder="Your Message"></textarea>
+                    <button type="submit">Send Message</button>
+                </form>
+            </section>
+           </div>
+
+        <!-- WEBSITE FOOTER -->
+        <footer id="footer">
+
+            <h2>Standard Fruit Products</h2>
+
+            <p>
+                Quality and Tradition Since 1967
+            </p>
+            <div class="footer-bottom">
+                <p>© 2026 Standard Fruit Products. All Rights Reserved.</p>
+            </div>
+
+        </footer>
+
+    </body>
+    </html>

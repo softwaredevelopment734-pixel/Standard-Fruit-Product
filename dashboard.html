@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - Standard Fruit Products</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+    <div class="admin-dashboard">
+
+        <h1>Admin Dashboard</h1>
+
+        <h3>Standard Fruit Products</h3>
+
+        <hr>
+
+        <h2>Product Management</h2>
+
+       <button type="button" id="add-product-btn">
+    Add New Product
+</button>
+
+<div id="add-product-form" hidden>
+
+    <h2>Add New Product</h2>
+
+    <input type="text"
+        id="product-name"
+        placeholder="Product Name">
+
+    <br><br>
+    <input type ="number"
+    id="product-price"
+    placeholder="Product Price">
+    <br><br>
+
+    <input type="text"
+     id="product-image"
+    placeholder="Product Image Path">
+
+    <br><br>
+
+    <textarea id="product-description"
+        placeholder="Product Description"></textarea>
+
+    <br><br>
+
+    <button type="button" id="save-product-btn">
+        Save Product
+    </button>
+
+    <p id="product-message"></p>
+
+</div>
+
+        <button type="button" id="product-list-btn">
+             Product List
+        </button>
+        <div id="product-list-admin">
+            <h2>All Products</h2>
+            <div id="admin-products"></div>
+            <div id="edit-product-form" hidden>
+
+    <h2>Edit Product</h2>
+
+    <input type="text"
+        id="edit-product-name"
+        placeholder="Product Name">
+
+    <br><br>
+
+    <input type="number"
+        id="edit-product-price"
+        placeholder="Product Price">
+
+    <br><br>
+
+    <input type="text"
+        id="edit-product-image"
+        placeholder="Product Image Path">
+
+    <br><br>
+
+    <textarea id="edit-product-description"
+        placeholder="Product Description"></textarea>
+
+    <br><br>
+
+    <button type="button" id="update-product-btn">
+        Update Product
+    </button>
+
+    <p id="edit-product-message"></p>
+
+</div>
+        </div>
+
+    <button type="button" id="manage-orders-btn">
+    Manage Orders
+</button>
+
+<div id="orders-section" hidden>
+
+    <h2>Customer Orders</h2>
+
+    <div id="admin-orders">
+        <p>Click Manage Orders to load orders.</p>
+    </div>
+
+</div>
+
+       <button type="button" id="logout-btn">
+    Logout
+</button>
+    </div>
+   <script>
+const firebaseConfig = {
+    apiKey: "AIzaSyB-3BwzXO928M92ptKwfdzpfMY5T3wqXUI",
+    authDomain: "standard-fruits-products.firebaseapp.com",
+    projectId: "standard-fruits-products",
+    storageBucket: "standard-fruits-products.firebasestorage.app",
+    messagingSenderId: "141486500587",
+    appId: "1:141486500587:web:a9e501c3d9ae147d68acae"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const auth = firebase.auth();
+
+const OWNER_UID = "j9TyGGrQjxZT6ZnwMmOQnb7ztJi2";
+
+auth.onAuthStateChanged(function(user) {
+
+    if (!user) {
+        window.location.href = "admin.html";
+        return;
+    }
+
+    if (user.uid !== OWNER_UID) {
+        auth.signOut();
+        window.location.href = "admin.html";
+        return;
+    }
+
+    console.log("Admin Dashboard Access Granted!");
+
+});
+document.getElementById("add-product-btn")
+.addEventListener("click", function() {
+
+    document.getElementById("add-product-form").hidden = false;
+
+});
+document.getElementById("save-product-btn")
+.addEventListener("click", async function() {
+
+    const name = document.getElementById("product-name").value;
+    const price = Number(document.getElementById("product-price").value);
+    const image = document.getElementById("product-image").value;
+    const description = document.getElementById("product-description").value;
+
+    const message = document.getElementById("product-message");
+
+    if (!name || !price || !image || !description) {
+        message.textContent = "Please fill all fields!";
+        return;
+    }
+
+    try {
+        await db.collection("products").add({
+            name: name,
+            price: price,
+            image: image,
+            description: description
+        });
+
+        message.textContent = "Product Saved Successfully!";
+
+    } catch (error) {
+        message.textContent = "Error: " + error.message;
+    }
+
+});
+// SHOW PRODUCT LIST
+let editingProductId =null;
+
+document.getElementById("product-list-btn")
+.addEventListener("click", async function() {
+
+    const container = document.getElementById("admin-products");
+
+    container.innerHTML = "<p>Loading Products...</p>";
+
+    try {
+
+        const snapshot = await db.collection("products").get();
+
+        container.innerHTML = "";
+        
+
+        snapshot.forEach(function(doc) {
+
+    const product = doc.data();
+
+    container.innerHTML += `
+        <div class="admin-product-item">
+
+            <h3>${product.name}</h3>
+
+            <p>Price: Rs. ${product.price}</p>
+
+            <p>${product.description}</p>
+
+            <p>Image: ${product.image}</p>
+
+            <button class="delete-product-btn"
+                data-id="${doc.id}">
+                Delete Product
+            </button>
+<button class="edit-product-btn"
+    data-id="${doc.id}">
+    Edit Product
+</button>
+        </div>
+    `;
+
+});
+container.querySelectorAll(".delete-product-btn")
+.forEach(function(button) {
+
+    button.addEventListener("click", async function() {
+
+        const confirmDelete = confirm(
+            "Are you sure you want to delete this product?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+
+            await db.collection("products")
+                .doc(button.dataset.id)
+                .delete();
+
+            button.parentElement.remove();
+
+            alert("Product Deleted Successfully!");
+
+        } catch (error) {
+
+            alert("Delete Error: " + error.message);
+
+        }
+
+    });
+
+});
+container.querySelectorAll(".edit-product-btn")
+.forEach(function(button) {
+
+    button.addEventListener("click", function() {
+
+        const productId = button.dataset.id;
+
+        editingProductId = productId;
+
+        db.collection("products")
+        .doc(productId)
+        .get()
+        .then(function(doc) {
+
+            if (!doc.exists) {
+                alert("Product not found!");
+                return;
+            }
+
+            const data = doc.data();
+
+            document.getElementById("edit-product-name").value = data.name;
+            document.getElementById("edit-product-price").value = data.price;
+            document.getElementById("edit-product-image").value = data.image;
+            document.getElementById("edit-product-description").value = data.description;
+
+            document.getElementById("edit-product-form").hidden = false;
+
+        })
+        .catch(function(error) {
+            alert("Error: " + error.message);
+        });
+
+    });
+
+});
+        if (snapshot.empty) {
+            container.textContent = "No Products Found.";
+        }
+
+    } catch (error) {
+
+        container.textContent = "Error: " + error.message;
+
+    }
+
+});
+// UPDATE PRODUCT
+
+document.getElementById("update-product-btn")
+.addEventListener("click", async function() {
+
+    const name = document.getElementById("edit-product-name").value.trim();
+    const price = Number(document.getElementById("edit-product-price").value);
+    const image = document.getElementById("edit-product-image").value.trim();
+    const description = document.getElementById("edit-product-description").value.trim();
+
+    const message = document.getElementById("edit-product-message");
+
+    if (!name || !price || !image || !description) {
+        message.textContent = "Please fill all fields!";
+        return;
+    }
+
+    if (!editingProductId) {
+        message.textContent = "Please select a product!";
+        return;
+    }
+
+    try {
+
+        await db.collection("products")
+            .doc(editingProductId)
+            .update({
+                name: name,
+                price: price,
+                image: image,
+                description: description
+            });
+
+        message.textContent = "Product Updated Successfully!";
+
+        editingProductId = null;
+
+        document.getElementById("edit-product-form").hidden = true;
+
+        document.getElementById("product-list-btn").click();
+
+    } catch (error) {
+
+        message.textContent = "Error: " + error.message;
+
+    }
+
+});
+// MANAGE CUSTOMER ORDERS
+
+document.getElementById("manage-orders-btn")
+.addEventListener("click", async function() {
+
+    const section = document.getElementById("orders-section");
+    const container = document.getElementById("admin-orders");
+
+    section.hidden = false;
+    container.innerHTML = "<p>Loading Orders...</p>";
+
+    try {
+
+        const snapshot = await db.collection("orders")
+            .orderBy("createdAt", "desc")
+            .get();
+
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+            container.textContent = "No Orders Found.";
+            return;
+        }
+
+        snapshot.forEach(function(doc) {
+
+            const order = doc.data();
+
+            const orderBox = document.createElement("div");
+            orderBox.className = "admin-product-item";
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Customer: " + order.customerName;
+
+            const phone = document.createElement("p");
+            phone.textContent = "Phone: " + order.customerPhone;
+
+            const address = document.createElement("p");
+            address.textContent = "Address: " + order.customerAddress;
+
+            const details = document.createElement("p");
+            details.textContent = "Order: " + order.orderDetails;
+
+            const total = document.createElement("p");
+            total.textContent = "Grand Total: Rs. " + order.grandTotal;
+
+            const status = document.createElement("p");
+            status.textContent = "Status: " + order.status;
+            const statusSelect = document.createElement("select");
+
+statusSelect.innerHTML = `
+    <option value="Pending">Pending</option>
+    <option value="Confirmed">Confirmed</option>
+    <option value="Delivered">Delivered</option>
+    <option value="Cancelled">Cancelled</option>
+`;
+statusSelect.addEventListener("change", async function() {
+
+    try {
+
+        await db.collection("orders")
+            .doc(doc.id)
+            .update({
+                status: statusSelect.value
+            });
+
+        alert("Order Status Updated Successfully!");
+
+    } catch (error) {
+
+        alert("Status Update Error: " + error.message);
+
+    }
+
+});
+
+statusSelect.value = order.status || "Pending";
+
+orderBox.appendChild(statusSelect);
+
+            orderBox.append(
+                heading, phone, address, details, total, status
+            );
+
+            container.appendChild(orderBox);
+
+        });
+
+    } catch (error) {
+
+        container.textContent = "Error: " + error.message;
+
+    }
+
+});
+// ADMIN LOGOUT
+
+document.getElementById("logout-btn")
+.addEventListener("click", function() {
+
+    auth.signOut()
+    .then(function() {
+
+        window.location.href = "admin.html";
+
+    })
+    .catch(function(error) {
+
+        alert("Logout Error: " + error.message);
+
+    });
+
+});
+
+</script>
+</body>
+</html>
